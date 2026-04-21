@@ -64,3 +64,22 @@ def test_clean_does_not_modify_input(
     before = day_with_outliers.copy()
     clean.clean(day_with_outliers, run_date)
     pd.testing.assert_frame_equal(day_with_outliers, before)
+
+
+def test_iqr_skipped_for_sparse_turbine(run_date: date) -> None:
+    """A turbine with fewer than 4 readings skips IQR removal without error."""
+    from datetime import datetime, timedelta
+
+    start = datetime.combine(run_date, datetime.min.time())
+    sparse = pd.DataFrame(
+        {
+            "timestamp": [start + timedelta(hours=h) for h in range(3)],
+            "turbine_id": [1, 1, 1],
+            "wind_speed": [10.0, 10.1, 10.2],
+            "wind_direction": [180.0, 180.0, 180.0],
+            "power_output": [3.0, 3.1, 3.2],
+        }
+    )
+    out = clean.clean(sparse, run_date)
+    # Original 3 values must survive — IQR was skipped, not applied
+    assert out[out["turbine_id"] == 1]["power_output"].notna().sum() >= 3

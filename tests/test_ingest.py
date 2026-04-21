@@ -40,3 +40,10 @@ def test_filter_to_window_excludes_other_days(uploads_dir: Path) -> None:
     df = ingest.read_raw(uploads_dir)
     empty = ingest.filter_to_window(df, date(2022, 1, 1))
     assert empty.empty
+
+
+def test_read_raw_all_corrupt_raises(tmp_path: Path) -> None:
+    """RuntimeError when all matching CSVs fail to parse."""
+    (tmp_path / "data_group_1.csv").write_bytes(b"\xff\xfe not valid utf-8 csv")
+    with pytest.raises(RuntimeError, match="All CSVs"):
+        ingest.read_raw(tmp_path)
