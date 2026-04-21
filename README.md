@@ -10,6 +10,9 @@ Requires [UV] -> https://docs.astral.sh/uv/
 # Install deps
 uv sync --group dev
 
+# Lint
+uv run ruff check .
+
 # Run the test suite
 uv run pytest -v --tb=short --cov=turbine_pipeline --cov-report=term-missing
 

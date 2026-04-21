@@ -21,6 +21,7 @@ build-backend = "uv_build"
 dev = [
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
+    "ruff>=0.9.0",
 ]
 
 [project.scripts]
@@ -29,3 +30,15 @@ turbine-pipeline = "turbine_pipeline.pipeline:cli"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes (unused imports, undefined names)
+    "I",   # isort (import ordering)
+    "UP",  # pyupgrade (modern Python syntax)
+    "B",   # flake8-bugbear (common bugs and design issues)
+]
