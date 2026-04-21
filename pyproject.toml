@@ -1,14 +1,31 @@
 [project]
 name = "turbine-pipeline"
 version = "0.1.0"
-description = "Add your description here"
+description = "Colibri pipeline test"
 readme = "README.md"
 authors = [
-    { name = "snugly172", email = "dane.evahill@gmail.com" }
+    { name = "Books172", email = "eva-hill.career@pm.me" }
 ]
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "duckdb>=1.2.1",
+    "pandas>=3.0.2",
+    "pandera>=0.20",
+]
 
 [build-system]
 requires = ["uv_build>=0.10.10,<0.11.0"]
 build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+]
+
+[project.scripts]
+turbine-pipeline = "turbine_pipeline.pipeline:cli"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
