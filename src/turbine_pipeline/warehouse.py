@@ -64,36 +64,13 @@ def _upsert(
     con: duckdb.DuckDBPyConnection,
     table: str,
     df: pd.DataFrame,
-    key_columns: list[str],
 ) -> None:
-    """Idempotent write: delete existing rows matching the key, then insert.
-
-    DuckDB supports `INSERT ... ON CONFLICT` but the delete-then-insert
-    pattern is dialect-portable and keeps the per-table logic readable.
-    A single transaction makes it atomic.
-    """
     if df.empty:
         return
 
     con.register("_staging", df)
     try:
-        con.execute("BEGIN")
-        key_values = (
-            con.execute(f"SELECT DISTINCT {', '.join(key_columns)} FROM _staging")
-            .fetchall()
-        )
-        if key_values:
-            placeholders = ", ".join(["?"] * len(key_columns))
-            where = f"({', '.join(key_columns)}) IN (VALUES " + ", ".join(
-                [f"({placeholders})"] * len(key_values)
-            ) + ")"
-            flat = [v for row in key_values for v in row]
-            con.execute(f"DELETE FROM {table} WHERE {where}", flat)
-        con.execute(f"INSERT INTO {table} SELECT * FROM _staging")
-        con.execute("COMMIT")
-    except Exception:
-        con.execute("ROLLBACK")
-        raise
+        con.execute(f"INSERT OR REPLACE INTO {table} SELECT * FROM _staging")
     finally:
         con.unregister("_staging")
 
@@ -101,16 +78,16 @@ def _upsert(
 def write_readings(
     con: duckdb.DuckDBPyConnection, df: pd.DataFrame
 ) -> None:
-    _upsert(con, "readings_clean", df, ["timestamp", "turbine_id"])
+    _upsert(con, "readings_clean", df)
 
 
 def write_stats(
     con: duckdb.DuckDBPyConnection, df: pd.DataFrame
 ) -> None:
-    _upsert(con, "daily_stats", df, ["run_date", "turbine_id"])
+    _upsert(con, "daily_stats", df)
 
 
 def write_anomalies(
     con: duckdb.DuckDBPyConnection, df: pd.DataFrame
 ) -> None:
-    _upsert(con, "anomalies", df, ["run_date", "turbine_id"])
+    _upsert(con, "anomalies", df)
