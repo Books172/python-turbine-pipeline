@@ -27,5 +27,5 @@ jobs:
       - name: Lint
         run: uv run ruff check .
 
-      - name: Run tests
+      - name: Test
         run: uv run pytest -v --tb=short --cov=turbine_pipeline --cov-report=term-missing
