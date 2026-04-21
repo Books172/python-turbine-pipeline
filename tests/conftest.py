@@ -64,9 +64,7 @@ def day_with_gaps() -> pd.DataFrame:
     # turbine 1: drop hours 5, 6 — within ffill bound
     mask1 = (df["turbine_id"] == 1) & df["timestamp"].dt.hour.isin([5, 6])
     # turbine 2: drop hours 10-14 — beyond ffill bound
-    mask2 = (df["turbine_id"] == 2) & df["timestamp"].dt.hour.isin(
-        [10, 11, 12, 13, 14]
-    )
+    mask2 = (df["turbine_id"] == 2) & df["timestamp"].dt.hour.isin([10, 11, 12, 13, 14])
     return df.loc[~(mask1 | mask2)].reset_index(drop=True)
 
 
@@ -88,11 +86,9 @@ def day_with_outliers() -> pd.DataFrame:
 
 
 @pytest.fixture
-def uploads_dir(
-    tmp_path: Path, clean_day: pd.DataFrame
-) -> Path:
+def uploads_dir(tmp_path: Path, clean_day: pd.DataFrame) -> Path:
     """Write a clean day split across three CSVs in the group_N pattern."""
-    groups = [TURBINE_IDS[i:i + 5] for i in range(0, len(TURBINE_IDS), 5)]
+    groups = [TURBINE_IDS[i : i + 5] for i in range(0, len(TURBINE_IDS), 5)]
     for gid, tids in enumerate(groups, start=1):
         group = _build_day(tids, RUN_DATE)
         # make turbine 8 a fleet-wide anomaly for integration tests

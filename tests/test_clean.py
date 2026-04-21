@@ -21,18 +21,14 @@ def test_clean_reindexes_missing_hours(
     assert (counts == 24).all()
 
 
-def test_short_gap_is_filled(
-    day_with_gaps: pd.DataFrame, run_date: date
-) -> None:
+def test_short_gap_is_filled(day_with_gaps: pd.DataFrame, run_date: date) -> None:
     """Turbine 1 had a 2-hour gap — should be forward-filled."""
     out = clean.clean(day_with_gaps, run_date)
     t1 = out[out["turbine_id"] == 1].sort_values("timestamp")
     assert t1["power_output"].notna().all()
 
 
-def test_long_gap_stays_nan(
-    day_with_gaps: pd.DataFrame, run_date: date
-) -> None:
+def test_long_gap_stays_nan(day_with_gaps: pd.DataFrame, run_date: date) -> None:
     """Turbine 2 had a 5-hour gap — ffill limit is 2, so hours 12-14 stay NaN."""
     out = clean.clean(day_with_gaps, run_date)
     t2 = out[out["turbine_id"] == 2].sort_values("timestamp")

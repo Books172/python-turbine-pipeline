@@ -49,12 +49,14 @@ def test_run_date_stamped(clean_day: pd.DataFrame, run_date: date) -> None:
 
 def test_std_power_is_zero_for_single_reading(run_date: date) -> None:
     """std is undefined for n=1; summarise must coerce it to 0 not NaN."""
-    df = pd.DataFrame({
-        "timestamp": [pd.Timestamp("2022-03-15 00:00")],
-        "turbine_id": [1],
-        "wind_speed": [10.0],
-        "wind_direction": [180.0],
-        "power_output": [3.0],
-    })
+    df = pd.DataFrame(
+        {
+            "timestamp": [pd.Timestamp("2022-03-15 00:00")],
+            "turbine_id": [1],
+            "wind_speed": [10.0],
+            "wind_direction": [180.0],
+            "power_output": [3.0],
+        }
+    )
     out = stats.summarise(df, run_date)
     assert float(out.loc[out["turbine_id"] == 1, "std_power"].iloc[0]) == 0.0

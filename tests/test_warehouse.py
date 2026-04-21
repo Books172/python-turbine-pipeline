@@ -10,9 +10,7 @@ from turbine_pipeline import warehouse
 def sample_readings() -> pd.DataFrame:
     return pd.DataFrame(
         {
-            "timestamp": pd.to_datetime(
-                ["2022-03-15 00:00", "2022-03-15 01:00"]
-            ),
+            "timestamp": pd.to_datetime(["2022-03-15 00:00", "2022-03-15 01:00"]),
             "turbine_id": [1, 1],
             "wind_speed": [12.0, 12.1],
             "wind_direction": [180.0, 181.0],
@@ -25,9 +23,7 @@ def test_write_and_read_back(tmp_path: Path, sample_readings: pd.DataFrame) -> N
     db = tmp_path / "t.duckdb"
     with warehouse.connect(db) as con:
         warehouse.write_readings(con, sample_readings)
-        rows = con.execute(
-            "SELECT COUNT(*) FROM readings_clean"
-        ).fetchone()[0]
+        rows = con.execute("SELECT COUNT(*) FROM readings_clean").fetchone()[0]
     assert rows == 2
 
 

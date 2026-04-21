@@ -25,9 +25,7 @@ FFILL_LIMIT = 2  # hours — wind conditions are broadly stable over 1-2h
 IQR_MULTIPLIER = 1.5
 
 
-def _reindex_to_hourly_grid(
-    df: pd.DataFrame, run_date: date
-) -> pd.DataFrame:
+def _reindex_to_hourly_grid(df: pd.DataFrame, run_date: date) -> pd.DataFrame:
     """Ensure every turbine has one row per hour of the run day.
 
     Missing rows become NaN rows. This is what turns "sensor dropped a
@@ -35,9 +33,7 @@ def _reindex_to_hourly_grid(
     pipeline can reason about.
     """
     start = datetime.combine(run_date, datetime.min.time())
-    expected_hours = pd.date_range(
-        start, start + timedelta(hours=23), freq="h"
-    )
+    expected_hours = pd.date_range(start, start + timedelta(hours=23), freq="h")
 
     pieces = []
     for turbine_id, group in df.groupby("turbine_id", sort=True):
@@ -105,10 +101,7 @@ def _bounded_ffill(df: pd.DataFrame) -> pd.DataFrame:
     """
     df = df.sort_values(["turbine_id", "timestamp"]).copy()
     numeric_cols = ["wind_speed", "wind_direction", "power_output"]
-    df[numeric_cols] = (
-        df.groupby("turbine_id")[numeric_cols]
-        .ffill(limit=FFILL_LIMIT)
-    )
+    df[numeric_cols] = df.groupby("turbine_id")[numeric_cols].ffill(limit=FFILL_LIMIT)
     return df
 
 

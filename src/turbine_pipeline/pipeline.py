@@ -82,9 +82,7 @@ def cli() -> None:
         required=True,
         help="Calendar day to process, YYYY-MM-DD.",
     )
-    parser.add_argument(
-        "--db-path", type=Path, default=Path("turbines.duckdb")
-    )
+    parser.add_argument("--db-path", type=Path, default=Path("turbines.duckdb"))
     parser.add_argument("--log-level", default="INFO")
     args = parser.parse_args()
 

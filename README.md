@@ -10,6 +10,9 @@ Requires [UV] -> https://docs.astral.sh/uv/
 # Install deps
 uv sync --group dev
 
+# Format
+uv run ruff format .
+
 # Lint
 uv run ruff check .
 

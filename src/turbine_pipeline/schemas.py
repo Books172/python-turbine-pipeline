@@ -35,13 +35,9 @@ class CleanReading(pa.DataFrameModel):
 
     timestamp: Series[pa.DateTime]
     turbine_id: Series[int] = pa.Field(ge=1)
-    wind_speed: Series[float] = pa.Field(
-        ge=0, le=WIND_SPEED_MAX, nullable=True
-    )
+    wind_speed: Series[float] = pa.Field(ge=0, le=WIND_SPEED_MAX, nullable=True)
     wind_direction: Series[float] = pa.Field(ge=0, le=360, nullable=True)
-    power_output: Series[float] = pa.Field(
-        ge=0, le=POWER_OUTPUT_MAX, nullable=True
-    )
+    power_output: Series[float] = pa.Field(ge=0, le=POWER_OUTPUT_MAX, nullable=True)
 
     class Config:
         strict = True

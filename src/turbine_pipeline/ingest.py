@@ -45,9 +45,7 @@ def read_raw(data_dir: Path) -> pd.DataFrame:
     """
     paths = sorted(Path(data_dir).glob(CSV_GLOB))
     if not paths:
-        raise FileNotFoundError(
-            f"No files matching {CSV_GLOB} in {data_dir}"
-        )
+        raise FileNotFoundError(f"No files matching {CSV_GLOB} in {data_dir}")
 
     frames = [df for df in (_read_one(p) for p in paths) if df is not None]
     if not frames:
@@ -57,9 +55,7 @@ def read_raw(data_dir: Path) -> pd.DataFrame:
     return RawReading.validate(raw)
 
 
-def filter_to_window(
-    df: pd.DataFrame, run_date: date
-) -> pd.DataFrame:
+def filter_to_window(df: pd.DataFrame, run_date: date) -> pd.DataFrame:
     """Filter to the 24-hour calendar day starting at midnight on ``run_date``.
 
     Calendar-aligned rather than rolling because the brief describes daily

@@ -83,9 +83,7 @@ def _upsert(
         con.unregister("_staging")
 
 
-def write_readings(
-    con: duckdb.DuckDBPyConnection, df: pd.DataFrame
-) -> None:
+def write_readings(con: duckdb.DuckDBPyConnection, df: pd.DataFrame) -> None:
     """Upsert cleaned hourly readings into the ``readings_clean`` table.
 
     Args:
@@ -95,9 +93,7 @@ def write_readings(
     _upsert(con, "readings_clean", df)
 
 
-def write_stats(
-    con: duckdb.DuckDBPyConnection, df: pd.DataFrame
-) -> None:
+def write_stats(con: duckdb.DuckDBPyConnection, df: pd.DataFrame) -> None:
     """Upsert per-turbine daily statistics into the ``daily_stats`` table.
 
     Args:
@@ -107,9 +103,7 @@ def write_stats(
     _upsert(con, "daily_stats", df)
 
 
-def write_anomalies(
-    con: duckdb.DuckDBPyConnection, df: pd.DataFrame
-) -> None:
+def write_anomalies(con: duckdb.DuckDBPyConnection, df: pd.DataFrame) -> None:
     """Upsert detected anomalies into the ``anomalies`` table.
 
     Args:

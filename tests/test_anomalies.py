@@ -45,15 +45,19 @@ def test_fleet_outlier_is_flagged(run_date: date) -> None:
 
 def test_single_turbine_has_no_anomalies(run_date: date) -> None:
     """Fleet std is NaN for a single turbine — the early-return path must fire."""
-    row = pd.DataFrame([{
-        "run_date": pd.Timestamp(run_date),
-        "turbine_id": 1,
-        "min_power": 2.0,
-        "max_power": 4.0,
-        "mean_power": 3.0,
-        "std_power": 0.5,
-        "count": 24,
-    }])
+    row = pd.DataFrame(
+        [
+            {
+                "run_date": pd.Timestamp(run_date),
+                "turbine_id": 1,
+                "min_power": 2.0,
+                "max_power": 4.0,
+                "mean_power": 3.0,
+                "std_power": 0.5,
+                "count": 24,
+            }
+        ]
+    )
     out = anomalies.detect(row, run_date)
     assert out.empty
 
