@@ -2,7 +2,7 @@ from datetime import date
 
 import pandas as pd
 
-from turbine_pipeline import anomalies, clean, stats
+from turbine_pipeline import anomalies
 
 
 def test_identical_fleet_has_no_anomalies(run_date: date) -> None:

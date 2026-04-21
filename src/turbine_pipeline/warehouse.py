@@ -9,9 +9,9 @@ double-insert, because the brief describes a daily append cadence where
 re-runs (for fixes, backfills) are expected.
 """
 
+from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Iterator
 
 import duckdb
 import pandas as pd

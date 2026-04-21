@@ -2,7 +2,6 @@ from datetime import date
 from pathlib import Path
 
 import pytest
-
 from conftest import TURBINE_IDS
 
 from turbine_pipeline import ingest

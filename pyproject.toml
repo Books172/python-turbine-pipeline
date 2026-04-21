@@ -31,9 +31,11 @@ turbine-pipeline = "turbine_pipeline.pipeline:cli"
 testpaths = ["tests"]
 pythonpath = ["src"]
 
+# explicitly defining line length. (Default is 88)
 [tool.ruff]
 line-length = 88
 
+# Specifying which ruff checks to perform. Default only includes E and F
 [tool.ruff.lint]
 select = [
     "E",   # pycodestyle errors

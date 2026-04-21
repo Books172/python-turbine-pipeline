@@ -11,7 +11,6 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-
 RUN_DATE = date(2022, 3, 15)
 TURBINE_IDS = list(range(1, 16))
 

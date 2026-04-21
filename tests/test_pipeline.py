@@ -20,9 +20,18 @@ def test_run_pipeline_populates_all_tables(
     assert 8 in result.anomalies["turbine_id"].values
 
     with warehouse.connect(db) as con:
-        assert con.execute("SELECT COUNT(*) FROM readings_clean").fetchone()[0] == _N * 24
-        assert con.execute("SELECT COUNT(*) FROM daily_stats").fetchone()[0] == _N
-        assert con.execute("SELECT COUNT(*) FROM anomalies").fetchone()[0] >= 1
+        readings_count = con.execute(
+            "SELECT COUNT(*) FROM readings_clean"
+        ).fetchone()[0]
+        stats_count = con.execute(
+            "SELECT COUNT(*) FROM daily_stats"
+        ).fetchone()[0]
+        anomalies_count = con.execute(
+            "SELECT COUNT(*) FROM anomalies"
+        ).fetchone()[0]
+        assert readings_count == _N * 24
+        assert stats_count == _N
+        assert anomalies_count >= 1
 
 
 def test_run_pipeline_is_idempotent(
@@ -33,5 +42,11 @@ def test_run_pipeline_is_idempotent(
     pipeline.run_pipeline(uploads_dir, run_date, db)
 
     with warehouse.connect(db) as con:
-        assert con.execute("SELECT COUNT(*) FROM readings_clean").fetchone()[0] == _N * 24
-        assert con.execute("SELECT COUNT(*) FROM daily_stats").fetchone()[0] == _N
+        readings_count = con.execute(
+            "SELECT COUNT(*) FROM readings_clean"
+        ).fetchone()[0]
+        stats_count = con.execute(
+            "SELECT COUNT(*) FROM daily_stats"
+        ).fetchone()[0]
+        assert readings_count == _N * 24
+        assert stats_count == _N
