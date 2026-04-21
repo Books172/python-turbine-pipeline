@@ -10,3 +10,4 @@ wheels/
 .venv
 .data
 .pytest_cache
+.coverage

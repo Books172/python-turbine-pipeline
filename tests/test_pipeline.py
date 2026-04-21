@@ -1,7 +1,11 @@
 from datetime import date
 from pathlib import Path
 
+from conftest import TURBINE_IDS
+
 from turbine_pipeline import pipeline, warehouse
+
+_N = len(TURBINE_IDS)
 
 
 def test_run_pipeline_populates_all_tables(
@@ -10,14 +14,14 @@ def test_run_pipeline_populates_all_tables(
     db = tmp_path / "integration.duckdb"
     result = pipeline.run_pipeline(uploads_dir, run_date, db)
 
-    assert len(result.readings) == 15 * 24
-    assert len(result.stats) == 15
+    assert len(result.readings) == _N * 24
+    assert len(result.stats) == _N
     # turbine 8 was made a fleet outlier in the fixture
     assert 8 in result.anomalies["turbine_id"].values
 
     with warehouse.connect(db) as con:
-        assert con.execute("SELECT COUNT(*) FROM readings_clean").fetchone()[0] == 15 * 24
-        assert con.execute("SELECT COUNT(*) FROM daily_stats").fetchone()[0] == 15
+        assert con.execute("SELECT COUNT(*) FROM readings_clean").fetchone()[0] == _N * 24
+        assert con.execute("SELECT COUNT(*) FROM daily_stats").fetchone()[0] == _N
         assert con.execute("SELECT COUNT(*) FROM anomalies").fetchone()[0] >= 1
 
 
@@ -29,5 +33,5 @@ def test_run_pipeline_is_idempotent(
     pipeline.run_pipeline(uploads_dir, run_date, db)
 
     with warehouse.connect(db) as con:
-        assert con.execute("SELECT COUNT(*) FROM readings_clean").fetchone()[0] == 15 * 24
-        assert con.execute("SELECT COUNT(*) FROM daily_stats").fetchone()[0] == 15
+        assert con.execute("SELECT COUNT(*) FROM readings_clean").fetchone()[0] == _N * 24
+        assert con.execute("SELECT COUNT(*) FROM daily_stats").fetchone()[0] == _N

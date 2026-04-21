@@ -28,11 +28,20 @@ def _read_one(path: Path) -> pd.DataFrame | None:
 
 
 def read_raw(data_dir: Path) -> pd.DataFrame:
-    """Read and concatenate all turbine-group CSVs in `data_dir`.
+    """Read and concatenate all turbine-group CSVs in ``data_dir``.
 
-    Returns a schema-validated DataFrame. Raises FileNotFoundError if the
-    directory contains no matching files — a genuinely empty run is almost
-    always a configuration bug, not a valid state.
+    A genuinely empty directory is almost always a configuration bug, not a
+    valid state, hence the hard raise rather than returning an empty frame.
+
+    Args:
+        data_dir: Directory containing ``data_group_*.csv`` files.
+
+    Returns:
+        Schema-validated RawReading frame combining all groups.
+
+    Raises:
+        FileNotFoundError: No matching CSV files found in the directory.
+        RuntimeError: Matching files exist but all failed to parse.
     """
     paths = sorted(Path(data_dir).glob(CSV_GLOB))
     if not paths:
@@ -51,11 +60,18 @@ def read_raw(data_dir: Path) -> pd.DataFrame:
 def filter_to_window(
     df: pd.DataFrame, run_date: date
 ) -> pd.DataFrame:
-    """Filter to the 24-hour calendar day starting at midnight on `run_date`.
+    """Filter to the 24-hour calendar day starting at midnight on ``run_date``.
 
-    Calendar-aligned (not rolling) because the brief describes daily appends
-    and daily stats — calendar days are what a reviewer would expect to see
-    in a `daily_stats` table.
+    Calendar-aligned rather than rolling because the brief describes daily
+    appends and daily stats — calendar days are what a reviewer would expect
+    to see in a ``daily_stats`` table.
+
+    Args:
+        df: Raw readings frame from :func:`read_raw`.
+        run_date: Calendar day to retain.
+
+    Returns:
+        A copy of ``df`` containing only rows within the run-date window.
     """
     start = datetime.combine(run_date, datetime.min.time())
     end = start + timedelta(days=1)

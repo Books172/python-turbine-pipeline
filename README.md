@@ -11,7 +11,7 @@ Requires [UV] -> https://docs.astral.sh/uv/
 uv sync --group dev
 
 # Run the test suite
-uv run pytest
+uv run pytest -v --tb=short --cov=turbine_pipeline --cov-report=term-missing
 
 # Run the pipeline to ingest all csv data (time bounds are project specific)
 d=2022-03-01; while [[ "$d" < "2022-04-01" ]]; do

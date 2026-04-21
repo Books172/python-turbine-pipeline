@@ -51,7 +51,14 @@ CREATE TABLE IF NOT EXISTS anomalies (
 
 @contextmanager
 def connect(db_path: Path | str) -> Iterator[duckdb.DuckDBPyConnection]:
-    """Context-managed DuckDB connection with schema ensured."""
+    """Open a DuckDB connection and ensure the schema exists.
+
+    Args:
+        db_path: Path to the DuckDB file. Created if it does not exist.
+
+    Yields:
+        An open ``DuckDBPyConnection`` with all tables initialised.
+    """
     con = duckdb.connect(str(db_path))
     try:
         con.execute(SCHEMA_SQL)
@@ -65,6 +72,7 @@ def _upsert(
     table: str,
     df: pd.DataFrame,
 ) -> None:
+    """Replace rows whose primary key already exists, then insert the rest."""
     if df.empty:
         return
 
@@ -78,16 +86,34 @@ def _upsert(
 def write_readings(
     con: duckdb.DuckDBPyConnection, df: pd.DataFrame
 ) -> None:
+    """Upsert cleaned hourly readings into the ``readings_clean`` table.
+
+    Args:
+        con: Open DuckDB connection from :func:`connect`.
+        df: Validated CleanReading frame.
+    """
     _upsert(con, "readings_clean", df)
 
 
 def write_stats(
     con: duckdb.DuckDBPyConnection, df: pd.DataFrame
 ) -> None:
+    """Upsert per-turbine daily statistics into the ``daily_stats`` table.
+
+    Args:
+        con: Open DuckDB connection from :func:`connect`.
+        df: Validated DailyStats frame.
+    """
     _upsert(con, "daily_stats", df)
 
 
 def write_anomalies(
     con: duckdb.DuckDBPyConnection, df: pd.DataFrame
 ) -> None:
+    """Upsert detected anomalies into the ``anomalies`` table.
+
+    Args:
+        con: Open DuckDB connection from :func:`connect`.
+        df: Validated Anomalies frame. May be empty.
+    """
     _upsert(con, "anomalies", df)

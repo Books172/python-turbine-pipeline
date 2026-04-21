@@ -10,9 +10,16 @@ from turbine_pipeline.schemas import DailyStats
 def summarise(df: pd.DataFrame, run_date: date) -> pd.DataFrame:
     """Compute min/max/mean/std/count of power_output per turbine.
 
-    `count` is the number of non-NaN hourly readings and is deliberately
-    exposed so downstream consumers can judge how complete a day's data was.
-    A mean over 12 hours is a different object to a mean over 24.
+    ``count`` reflects non-NaN readings only, so downstream consumers can
+    judge data completeness — a mean over 12 hours is a different object to
+    a mean over 24.
+
+    Args:
+        df: Cleaned readings frame from :func:`clean.clean`.
+        run_date: Calendar day being summarised.
+
+    Returns:
+        Validated DailyStats frame with one row per turbine.
     """
     agg = (
         df.groupby("turbine_id")["power_output"]

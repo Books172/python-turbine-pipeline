@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, timedelta
 
 import pandas as pd
 
@@ -68,8 +68,6 @@ def test_clean_does_not_modify_input(
 
 def test_iqr_skipped_for_sparse_turbine(run_date: date) -> None:
     """A turbine with fewer than 4 readings skips IQR removal without error."""
-    from datetime import datetime, timedelta
-
     start = datetime.combine(run_date, datetime.min.time())
     sparse = pd.DataFrame(
         {

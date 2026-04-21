@@ -1,6 +1,8 @@
-"""Turbine pipeline. ingest -> clean -> summarise."""
+"""Turbine pipeline: ingest → clean → stats → anomalies → store."""
 
-from turbine_pipeline.pipeline import run_pipeline
+from importlib.metadata import version
 
-__all__ = ["run_pipeline"]
-__version__ = "0.1.0"
+from turbine_pipeline.pipeline import PipelineResult, run_pipeline
+
+__all__ = ["run_pipeline", "PipelineResult"]
+__version__ = version("turbine-pipeline")

@@ -18,13 +18,11 @@ POWER_OUTPUT_MAX = 10.0  # MW — above nameplate for the largest onshore turbin
 class RawReading(pa.DataFrameModel):
     """Shape of a row straight out of the CSV. Permissive on values."""
 
-    timestamp: Series[pa.DateTime] = pa.Field(coerce=True)
-    turbine_id: Series[int] = pa.Field(ge=1, coerce=True)
-    wind_speed: Series[float] = pa.Field(nullable=True, coerce=True)
-    wind_direction: Series[float] = pa.Field(
-        ge=0, le=360, nullable=True, coerce=True
-    )
-    power_output: Series[float] = pa.Field(nullable=True, coerce=True)
+    timestamp: Series[pa.DateTime]
+    turbine_id: Series[int] = pa.Field(ge=1)
+    wind_speed: Series[float] = pa.Field(nullable=True)
+    wind_direction: Series[float] = pa.Field(ge=0, le=360, nullable=True)
+    power_output: Series[float] = pa.Field(nullable=True)
 
     class Config:
         strict = True
@@ -58,7 +56,7 @@ class DailyStats(pa.DataFrameModel):
     min_power: Series[float] = pa.Field(ge=0, nullable=True)
     max_power: Series[float] = pa.Field(ge=0, nullable=True)
     mean_power: Series[float] = pa.Field(ge=0, nullable=True)
-    std_power: Series[float] = pa.Field(ge=0, nullable=True)
+    std_power: Series[float] = pa.Field(ge=0)
     count: Series[int] = pa.Field(ge=0)
 
     class Config:
@@ -71,8 +69,8 @@ class Anomalies(pa.DataFrameModel):
 
     run_date: Series[pa.DateTime]
     turbine_id: Series[int] = pa.Field(ge=1)
-    turbine_mean: Series[float]
-    fleet_mean: Series[float]
+    turbine_mean: Series[float] = pa.Field(ge=0)
+    fleet_mean: Series[float] = pa.Field(ge=0)
     fleet_std: Series[float] = pa.Field(ge=0)
     deviation_sigmas: Series[float]
 

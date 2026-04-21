@@ -35,9 +35,17 @@ def run_pipeline(
     """Run the full pipeline for one calendar day.
 
     Args:
-        data_dir: directory containing `data_group_*.csv` files.
-        run_date: calendar day to process (UTC, midnight-aligned).
-        db_path: path to the DuckDB file. Created if it doesn't exist.
+        data_dir: Directory containing ``data_group_*.csv`` files.
+        run_date: Calendar day to process (UTC, midnight-aligned).
+        db_path: Path to the DuckDB file. Created if it does not exist.
+
+    Returns:
+        PipelineResult containing the cleaned readings, daily stats,
+        and any detected anomalies for the run date.
+
+    Raises:
+        FileNotFoundError: No matching CSVs found in ``data_dir``.
+        RuntimeError: Matching CSVs exist but all failed to parse.
     """
     log.info("Running pipeline for %s", run_date)
 

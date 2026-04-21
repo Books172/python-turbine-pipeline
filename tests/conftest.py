@@ -13,6 +13,7 @@ import pytest
 
 
 RUN_DATE = date(2022, 3, 15)
+TURBINE_IDS = list(range(1, 16))
 
 
 def _build_day(turbine_ids: list[int], run_date: date) -> pd.DataFrame:
@@ -92,7 +93,8 @@ def uploads_dir(
     tmp_path: Path, clean_day: pd.DataFrame
 ) -> Path:
     """Write a clean day split across three CSVs in the group_N pattern."""
-    for gid, tids in enumerate([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15]], start=1):
+    groups = [TURBINE_IDS[i:i + 5] for i in range(0, len(TURBINE_IDS), 5)]
+    for gid, tids in enumerate(groups, start=1):
         group = _build_day(tids, RUN_DATE)
         # make turbine 8 a fleet-wide anomaly for integration tests
         if 8 in tids:

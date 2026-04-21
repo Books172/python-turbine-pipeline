@@ -113,10 +113,16 @@ def _bounded_ffill(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def clean(df: pd.DataFrame, run_date: date) -> pd.DataFrame:
-    """Full cleaning pipeline: reindex → null-bad → null-IQR → bounded ffill.
+    """Run the full cleaning pipeline: reindex → null-bad → null-IQR → ffill.
 
-    Input is expected to be already filtered to the run-date window.
-    Output is schema-validated against CleanReading.
+    Input is expected to already be filtered to the run-date window.
+
+    Args:
+        df: Raw readings filtered to the run-date window.
+        run_date: Calendar day being cleaned, used to build the hourly grid.
+
+    Returns:
+        Validated CleanReading frame with one row per turbine per hour.
     """
     df = _reindex_to_hourly_grid(df, run_date)
     df = _null_out_of_bounds(df)

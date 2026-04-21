@@ -3,10 +3,13 @@ from pathlib import Path
 
 import pandas as pd
 
+import pytest
+
 from turbine_pipeline import warehouse
 
 
-def _sample_readings() -> pd.DataFrame:
+@pytest.fixture
+def sample_readings() -> pd.DataFrame:
     return pd.DataFrame(
         {
             "timestamp": pd.to_datetime(
@@ -20,35 +23,34 @@ def _sample_readings() -> pd.DataFrame:
     )
 
 
-def test_write_and_read_back(tmp_path: Path) -> None:
+def test_write_and_read_back(tmp_path: Path, sample_readings: pd.DataFrame) -> None:
     db = tmp_path / "t.duckdb"
     with warehouse.connect(db) as con:
-        warehouse.write_readings(con, _sample_readings())
+        warehouse.write_readings(con, sample_readings)
         rows = con.execute(
             "SELECT COUNT(*) FROM readings_clean"
         ).fetchone()[0]
     assert rows == 2
 
 
-def test_upsert_is_idempotent(tmp_path: Path) -> None:
+def test_upsert_is_idempotent(tmp_path: Path, sample_readings: pd.DataFrame) -> None:
     """The single most important property of this module: rerunning a day
     must not create duplicates."""
     db = tmp_path / "t.duckdb"
-    df = _sample_readings()
     with warehouse.connect(db) as con:
-        warehouse.write_readings(con, df)
-        warehouse.write_readings(con, df)  # re-run same day
-        warehouse.write_readings(con, df)  # and again
+        warehouse.write_readings(con, sample_readings)
+        warehouse.write_readings(con, sample_readings)  # re-run same day
+        warehouse.write_readings(con, sample_readings)  # and again
         rows = con.execute("SELECT COUNT(*) FROM readings_clean").fetchone()[0]
     assert rows == 2
 
 
-def test_upsert_updates_changed_values(tmp_path: Path) -> None:
+def test_upsert_updates_changed_values(tmp_path: Path, sample_readings: pd.DataFrame) -> None:
     """If a re-run produces corrected values, the new values win."""
     db = tmp_path / "t.duckdb"
     with warehouse.connect(db) as con:
-        warehouse.write_readings(con, _sample_readings())
-        corrected = _sample_readings()
+        warehouse.write_readings(con, sample_readings)
+        corrected = sample_readings.copy()
         corrected["power_output"] = [9.9, 9.9]
         warehouse.write_readings(con, corrected)
         vals = [
@@ -60,11 +62,10 @@ def test_upsert_updates_changed_values(tmp_path: Path) -> None:
     assert vals == [9.9, 9.9]
 
 
-def test_empty_write_is_noop(tmp_path: Path) -> None:
+def test_empty_write_is_noop(tmp_path: Path, sample_readings: pd.DataFrame) -> None:
     """Anomaly table will often be empty — writing nothing must not raise."""
     db = tmp_path / "t.duckdb"
-    empty = _sample_readings().iloc[0:0]
     with warehouse.connect(db) as con:
-        warehouse.write_readings(con, empty)
+        warehouse.write_readings(con, sample_readings.iloc[0:0])
         rows = con.execute("SELECT COUNT(*) FROM readings_clean").fetchone()[0]
     assert rows == 0
