@@ -8,7 +8,7 @@ Requires [UV] -> https://docs.astral.sh/uv/
 
 ```bash
 # Install deps
-uv sync --extra dev
+uv sync --group dev
 
 # Run the test suite
 uv run pytest
