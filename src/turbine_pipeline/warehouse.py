@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS readings_clean (
 );
 
 CREATE TABLE IF NOT EXISTS daily_stats (
-    run_date    TIMESTAMP NOT NULL,
+    run_date    DATE      NOT NULL,
     turbine_id  INTEGER   NOT NULL,
     min_power   DOUBLE,
     max_power   DOUBLE,
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS daily_stats (
 );
 
 CREATE TABLE IF NOT EXISTS anomalies (
-    run_date          TIMESTAMP NOT NULL,
+    run_date          DATE      NOT NULL,
     turbine_id        INTEGER   NOT NULL,
     turbine_mean      DOUBLE    NOT NULL,
     fleet_mean        DOUBLE    NOT NULL,

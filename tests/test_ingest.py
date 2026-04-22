@@ -1,3 +1,4 @@
+import logging
 from datetime import date
 from pathlib import Path
 
@@ -20,9 +21,7 @@ def test_read_raw_empty_dir_raises(tmp_path: Path) -> None:
 
 def test_read_raw_skips_corrupt_file(uploads_dir: Path, caplog) -> None:
     """A garbage file is logged and skipped; good files still return data."""
-    import logging
-
-    (uploads_dir / "data_group_99.csv").write_text("not,a,valid\ncsv,at,all\n")
+    (uploads_dir / "data_group_99.csv").write_bytes(b"\xff\xfe not valid utf-8 csv")
     with caplog.at_level(logging.WARNING, logger="turbine_pipeline.ingest"):
         df = ingest.read_raw(uploads_dir)
     assert set(df["turbine_id"].unique()) == set(TURBINE_IDS)

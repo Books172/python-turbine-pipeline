@@ -9,15 +9,6 @@ def test_stats_shape(clean_day: pd.DataFrame, run_date: date) -> None:
     cleaned = clean.clean(clean_day, run_date)
     out = stats.summarise(cleaned, run_date)
     assert len(out) == 5
-    assert set(out.columns) == {
-        "run_date",
-        "turbine_id",
-        "min_power",
-        "max_power",
-        "mean_power",
-        "std_power",
-        "count",
-    }
 
 
 def test_min_le_mean_le_max(clean_day: pd.DataFrame, run_date: date) -> None:

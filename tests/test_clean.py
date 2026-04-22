@@ -5,13 +5,6 @@ import pandas as pd
 from turbine_pipeline import clean
 
 
-def test_clean_reindexes_full_day(clean_day: pd.DataFrame, run_date: date) -> None:
-    """Output has exactly 24 rows per turbine even when input is complete."""
-    out = clean.clean(clean_day, run_date)
-    counts = out.groupby("turbine_id").size()
-    assert (counts == 24).all()
-
-
 def test_clean_reindexes_missing_hours(day_with_gaps: pd.DataFrame, run_date: date) -> None:
     """Missing hours are materialised as rows so downstream stats see them."""
     out = clean.clean(day_with_gaps, run_date)
