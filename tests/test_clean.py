@@ -12,9 +12,7 @@ def test_clean_reindexes_full_day(clean_day: pd.DataFrame, run_date: date) -> No
     assert (counts == 24).all()
 
 
-def test_clean_reindexes_missing_hours(
-    day_with_gaps: pd.DataFrame, run_date: date
-) -> None:
+def test_clean_reindexes_missing_hours(day_with_gaps: pd.DataFrame, run_date: date) -> None:
     """Missing hours are materialised as rows so downstream stats see them."""
     out = clean.clean(day_with_gaps, run_date)
     counts = out.groupby("turbine_id").size()
@@ -37,25 +35,19 @@ def test_long_gap_stays_nan(day_with_gaps: pd.DataFrame, run_date: date) -> None
     assert nan_count == 3
 
 
-def test_negative_power_is_nulled(
-    day_with_outliers: pd.DataFrame, run_date: date
-) -> None:
+def test_negative_power_is_nulled(day_with_outliers: pd.DataFrame, run_date: date) -> None:
     """Physically impossible values get nulled, then potentially ffilled."""
     out = clean.clean(day_with_outliers, run_date)
     # No negatives survive cleaning regardless of fill decisions.
     assert (out["power_output"].dropna() >= 0).all()
 
 
-def test_stuck_high_sensor_is_nulled(
-    day_with_outliers: pd.DataFrame, run_date: date
-) -> None:
+def test_stuck_high_sensor_is_nulled(day_with_outliers: pd.DataFrame, run_date: date) -> None:
     out = clean.clean(day_with_outliers, run_date)
     assert out["power_output"].dropna().max() < 100
 
 
-def test_clean_does_not_modify_input(
-    day_with_outliers: pd.DataFrame, run_date: date
-) -> None:
+def test_clean_does_not_modify_input(day_with_outliers: pd.DataFrame, run_date: date) -> None:
     """Cleaning is a pure function — input frame untouched."""
     before = day_with_outliers.copy()
     clean.clean(day_with_outliers, run_date)

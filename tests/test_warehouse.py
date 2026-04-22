@@ -39,9 +39,7 @@ def test_upsert_is_idempotent(tmp_path: Path, sample_readings: pd.DataFrame) -> 
     assert rows == 2
 
 
-def test_upsert_updates_changed_values(
-    tmp_path: Path, sample_readings: pd.DataFrame
-) -> None:
+def test_upsert_updates_changed_values(tmp_path: Path, sample_readings: pd.DataFrame) -> None:
     """If a re-run produces corrected values, the new values win."""
     db = tmp_path / "t.duckdb"
     with warehouse.connect(db) as con:

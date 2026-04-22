@@ -86,9 +86,7 @@ def day_with_outliers() -> pd.DataFrame:
     return df
 
 
-def _write_groups(
-    tmp_path: Path, run_dates: list[date], anomaly_turbine: int = 8
-) -> Path:
+def _write_groups(tmp_path: Path, run_dates: list[date], anomaly_turbine: int = 8) -> Path:
     """Write turbine group CSVs spanning the given dates into tmp_path."""
     groups = [TURBINE_IDS[i : i + 5] for i in range(0, len(TURBINE_IDS), 5)]
     for gid, tids in enumerate(groups, start=1):
@@ -114,10 +112,7 @@ def month_uploads_dir(tmp_path: Path) -> Path:
     Represents the realistic input described in the project spec: a single
     set of CSV files covering one calendar month.
     """
-    run_dates = [
-        MONTH_START + timedelta(days=i)
-        for i in range((MONTH_END - MONTH_START).days + 1)
-    ]
+    run_dates = [MONTH_START + timedelta(days=i) for i in range((MONTH_END - MONTH_START).days + 1)]
     return _write_groups(tmp_path, run_dates)
 
 

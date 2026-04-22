@@ -121,9 +121,7 @@ def run_pipeline_range(
         ValueError: ``end_date`` is before ``start_date``.
     """
     if end_date < start_date:
-        raise ValueError(
-            f"end_date {end_date} must not be before start_date {start_date}"
-        )
+        raise ValueError(f"end_date {end_date} must not be before start_date {start_date}")
 
     total_days = (end_date - start_date).days + 1
     log.info("Processing %s to %s (%d days)", start_date, end_date, total_days)
@@ -189,14 +187,9 @@ def cli() -> None:
             f"{len(result.anomalies)} anomalies → {args.db_path}"
         )
     else:
-        results = run_pipeline_range(
-            args.data_dir, args.start_date, args.end_date, args.db_path
-        )
+        results = run_pipeline_range(args.data_dir, args.start_date, args.end_date, args.db_path)
         total_readings = sum(len(r.readings) for r in results.values())
-        print(
-            f"Processed {len(results)} days, "
-            f"{total_readings} total readings → {args.db_path}"
-        )
+        print(f"Processed {len(results)} days, {total_readings} total readings → {args.db_path}")
 
 
 if __name__ == "__main__":

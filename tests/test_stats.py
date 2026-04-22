@@ -28,9 +28,7 @@ def test_min_le_mean_le_max(clean_day: pd.DataFrame, run_date: date) -> None:
     assert (out["mean_power"] <= out["max_power"]).all()
 
 
-def test_count_reflects_unimputed_gaps(
-    day_with_gaps: pd.DataFrame, run_date: date
-) -> None:
+def test_count_reflects_unimputed_gaps(day_with_gaps: pd.DataFrame, run_date: date) -> None:
     """Turbine 2's long gap should reduce its count below 24 so consumers
     can see the mean is based on partial data."""
     cleaned = clean.clean(day_with_gaps, run_date)
