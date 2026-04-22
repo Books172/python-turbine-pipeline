@@ -1,6 +1,6 @@
 # Turbine Pipeline
 
-Local python turbine pipeline to ingest, clean, summerise, and store turbine data.
+Local python turbine pipeline to ingest, clean, summarise, and store turbine data.
 
 ## Running
 
@@ -19,13 +19,14 @@ uv run ruff check .
 # Run the test suite
 uv run pytest -v --tb=short --cov=turbine_pipeline --cov-report=term-missing
 
-# Run the pipeline to ingest all csv data (time bounds are project specific)
-d=2022-03-01; while [[ "$d" < "2022-04-01" ]]; do
-  uv run turbine-pipeline --data-dir /path/to/csvs --run-date "$d" --db-path turbines.duckdb
-  d=$(date -d "$d + 1 day" +%Y-%m-%d)
-done
+# Process a date range (CSVs are read once, all days processed in a single run)
+uv run turbine-pipeline \
+    --data-dir /path/to/csvs \
+    --start-date 2022-03-01 \
+    --end-date 2022-03-31 \
+    --db-path turbines.duckdb
 
-# Run the pipeline to ingest a specific days data
+# Process a single day
 uv run turbine-pipeline \
     --data-dir /path/to/csvs \
     --run-date 2022-03-15 \

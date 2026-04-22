@@ -5,6 +5,7 @@ modes the brief describes (missing entries, outliers) so the cleaning and
 anomaly logic actually gets exercised.
 """
 
+import math
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
@@ -13,6 +14,8 @@ import pytest
 
 RUN_DATE = date(2022, 3, 15)
 TURBINE_IDS = list(range(1, 16))
+MONTH_START = date(2022, 3, 1)
+MONTH_END = date(2022, 3, 31)
 
 
 def _build_day(turbine_ids: list[int], run_date: date) -> pd.DataFrame:
@@ -24,8 +27,6 @@ def _build_day(turbine_ids: list[int], run_date: date) -> pd.DataFrame:
     every value in a series is identical (floating-point equality quirks,
     z-score self-capping).
     """
-    import math
-
     start = datetime.combine(run_date, datetime.min.time())
     hours = [start + timedelta(hours=h) for h in range(24)]
     rows = []
@@ -85,14 +86,54 @@ def day_with_outliers() -> pd.DataFrame:
     return df
 
 
-@pytest.fixture
-def uploads_dir(tmp_path: Path, clean_day: pd.DataFrame) -> Path:
-    """Write a clean day split across three CSVs in the group_N pattern."""
+def _write_groups(
+    tmp_path: Path, run_dates: list[date], anomaly_turbine: int = 8
+) -> Path:
+    """Write turbine group CSVs spanning the given dates into tmp_path."""
     groups = [TURBINE_IDS[i : i + 5] for i in range(0, len(TURBINE_IDS), 5)]
     for gid, tids in enumerate(groups, start=1):
-        group = _build_day(tids, RUN_DATE)
-        # make turbine 8 a fleet-wide anomaly for integration tests
-        if 8 in tids:
-            group.loc[group["turbine_id"] == 8, "power_output"] = 0.5
+        frames = [_build_day(tids, d) for d in run_dates]
+        group = pd.concat(frames, ignore_index=True)
+        if anomaly_turbine in tids:
+            group.loc[group["turbine_id"] == anomaly_turbine, "power_output"] = 0.5
         group.to_csv(tmp_path / f"data_group_{gid}.csv", index=False)
     return tmp_path
+
+
+@pytest.fixture
+def multi_day_uploads_dir(tmp_path: Path) -> Path:
+    """Two consecutive days of data in the same CSV files."""
+    run_dates = [RUN_DATE, RUN_DATE + timedelta(days=1)]
+    return _write_groups(tmp_path, run_dates)
+
+
+@pytest.fixture
+def month_uploads_dir(tmp_path: Path) -> Path:
+    """Full month (March 2022) of data across all 15 turbines.
+
+    Represents the realistic input described in the project spec: a single
+    set of CSV files covering one calendar month.
+    """
+    run_dates = [
+        MONTH_START + timedelta(days=i)
+        for i in range((MONTH_END - MONTH_START).days + 1)
+    ]
+    return _write_groups(tmp_path, run_dates)
+
+
+@pytest.fixture
+def month_uploads_dir_with_gap(tmp_path: Path) -> Path:
+    """Full month with days 10-12 removed to simulate missing data."""
+    gap = {MONTH_START + timedelta(days=i) for i in range(9, 12)}
+    run_dates = [
+        MONTH_START + timedelta(days=i)
+        for i in range((MONTH_END - MONTH_START).days + 1)
+        if MONTH_START + timedelta(days=i) not in gap
+    ]
+    return _write_groups(tmp_path, run_dates)
+
+
+@pytest.fixture
+def uploads_dir(tmp_path: Path) -> Path:
+    """Single day (RUN_DATE) split across three CSVs in the group_N pattern."""
+    return _write_groups(tmp_path, [RUN_DATE])
