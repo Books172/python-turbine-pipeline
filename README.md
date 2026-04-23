@@ -34,7 +34,7 @@ uv run turbine-pipeline \
 ```
 ### Viewing Data
 
-Requires [DuckDB UI] -> https://duckdb.org/2025/03/12/duckdb-ui
+Requires [DuckDB UI] ──▶ https://duckdb.org/2025/03/12/duckdb-ui
 
 ```bash
 
