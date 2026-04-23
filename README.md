@@ -4,7 +4,7 @@ Local python turbine pipeline to ingest, clean, summarise, and store turbine dat
 
 ## Running
 
-Requires [UV] -> https://docs.astral.sh/uv/
+Requires [UV] ──▶ https://docs.astral.sh/uv/
 
 ```bash
 # Install deps
