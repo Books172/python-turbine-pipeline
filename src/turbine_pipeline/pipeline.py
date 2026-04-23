@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
+import duckdb
 import pandas as pd
 
 from turbine_pipeline import anomalies, clean, ingest, stats, warehouse
@@ -29,14 +30,14 @@ class PipelineResult:
 def _process_date(
     raw: pd.DataFrame,
     run_date: date,
-    db_path: Path | str,
+    con: duckdb.DuckDBPyConnection,
 ) -> PipelineResult | None:
     """Process one calendar day from a pre-read raw DataFrame.
 
     Args:
         raw: Full raw readings frame (may span multiple days).
         run_date: Calendar day to process.
-        db_path: Path to the DuckDB file.
+        con: Open DuckDB connection from :func:`warehouse.connect`.
 
     Returns:
         PipelineResult for the day, or None if no data exists for that date.
@@ -51,17 +52,11 @@ def _process_date(
     cleaned = clean.clean(windowed, run_date)
     summary = stats.summarise(cleaned, run_date)
     flagged = anomalies.detect(summary, run_date)
-    log.info(
-        "%s: %d turbines, %d anomalies",
-        run_date,
-        len(summary),
-        len(flagged),
-    )
+    log.info("%s: %d turbines, %d anomalies", run_date, len(summary), len(flagged))
 
-    with warehouse.connect(db_path) as con:
-        warehouse.write_readings(con, cleaned)
-        warehouse.write_stats(con, summary)
-        warehouse.write_anomalies(con, flagged)
+    warehouse.write_readings(con, cleaned)
+    warehouse.write_stats(con, summary)
+    warehouse.write_anomalies(con, flagged)
 
     return PipelineResult(readings=cleaned, stats=summary, anomalies=flagged)
 
@@ -88,7 +83,8 @@ def run_pipeline(
         ValueError: CSVs were read successfully but contain no data for ``run_date``.
     """
     raw = ingest.read_raw(Path(data_dir))
-    result = _process_date(raw, run_date, db_path)
+    with warehouse.connect(db_path) as con:
+        result = _process_date(raw, run_date, con)
     if result is None:
         raise ValueError(f"No data found for {run_date} in {data_dir}")
     return result
@@ -102,8 +98,9 @@ def run_pipeline_range(
 ) -> dict[date, PipelineResult]:
     """Process all calendar days from start_date to end_date inclusive.
 
-    CSVs are read once and reused for each day, making this significantly
-    more efficient than calling run_pipeline in a loop for large date ranges.
+    CSVs are read once and a single database connection is held for the
+    entire range, making this significantly more efficient than calling
+    run_pipeline in a loop for large date ranges.
 
     Args:
         data_dir: Directory containing ``data_group_*.csv`` files.
@@ -129,15 +126,20 @@ def run_pipeline_range(
     raw = ingest.read_raw(Path(data_dir))
 
     results: dict[date, PipelineResult] = {}
-    current = start_date
-    while current <= end_date:
-        result = _process_date(raw, current, db_path)
-        if result is not None:
-            results[current] = result
-        current += timedelta(days=1)
+    with warehouse.connect(db_path) as con:
+        current = start_date
+        while current <= end_date:
+            result = _process_date(raw, current, con)
+            if result is not None:
+                results[current] = result
+            current += timedelta(days=1)
 
     log.info("Completed %d/%d days with data", len(results), total_days)
     return results
+
+
+def _parse_date(s: str) -> date:
+    return datetime.strptime(s, "%Y-%m-%d").date()
 
 
 def cli() -> None:
@@ -146,8 +148,6 @@ def cli() -> None:
     Single day:  turbine-pipeline --data-dir ... --run-date YYYY-MM-DD
     Date range:  turbine-pipeline --data-dir ... --start-date YYYY-MM-DD --end-date YYYY-MM-DD
     """
-    _date = lambda s: datetime.strptime(s, "%Y-%m-%d").date()  # noqa: E731
-
     parser = argparse.ArgumentParser(description="Run the turbine pipeline.")
     parser.add_argument("--data-dir", type=Path, required=True)
     parser.add_argument("--db-path", type=Path, default=Path("turbines.duckdb"))
@@ -156,17 +156,17 @@ def cli() -> None:
     date_group = parser.add_mutually_exclusive_group(required=True)
     date_group.add_argument(
         "--run-date",
-        type=_date,
+        type=_parse_date,
         help="Single calendar day to process, YYYY-MM-DD.",
     )
     date_group.add_argument(
         "--start-date",
-        type=_date,
+        type=_parse_date,
         help="Start of date range, YYYY-MM-DD. Requires --end-date.",
     )
     parser.add_argument(
         "--end-date",
-        type=_date,
+        type=_parse_date,
         help="End of date range (inclusive), YYYY-MM-DD. Requires --start-date.",
     )
     args = parser.parse_args()
