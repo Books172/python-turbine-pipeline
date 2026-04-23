@@ -175,6 +175,8 @@ def cli() -> None:
 
     if args.start_date and not args.end_date:
         parser.error("--end-date is required when --start-date is provided")
+    if args.end_date and not args.start_date:
+        parser.error("--start-date is required when --end-date is provided")
 
     logging.basicConfig(
         level=args.log_level,

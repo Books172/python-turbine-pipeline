@@ -44,12 +44,12 @@ duckdb -ui
 Add Database -> Path to local turbines.duckdb file
 
 ## Design
-This small pipeline is designed to be portable, due to use case, aslongside being modular to enable unit testing.
+This small pipeline is designed to be portable, due to use case, alongside being modular to enable unit testing.
 
 ```
 ingest  ──▶  clean  ──▶  stats  ──▶  anomalies  ──▶  warehouse
-                                      │
-                                      └─▶  (DuckDB: 3 tables)
+                                                       │
+                                                       └─▶  (DuckDB: 4 tables)
 ```
 
 | Module         | Responsibility                                            |
