@@ -54,6 +54,7 @@ def _process_date(
     flagged = anomalies.detect(summary, run_date)
     log.info("%s: %d turbines, %d anomalies", run_date, len(summary), len(flagged))
 
+    warehouse.write_raw(con, windowed)
     warehouse.write_readings(con, cleaned)
     warehouse.write_stats(con, summary)
     warehouse.write_anomalies(con, flagged)
@@ -139,6 +140,7 @@ def run_pipeline_range(
 
 
 def _parse_date(s: str) -> date:
+    """Parse a YYYY-MM-DD string into a date for argparse ``type=`` callbacks."""
     return datetime.strptime(s, "%Y-%m-%d").date()
 
 

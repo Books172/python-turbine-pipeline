@@ -17,6 +17,15 @@ import duckdb
 import pandas as pd
 
 SCHEMA_SQL = """
+CREATE TABLE IF NOT EXISTS raw_readings (
+    timestamp      TIMESTAMP NOT NULL,
+    turbine_id     INTEGER   NOT NULL,
+    wind_speed     DOUBLE,
+    wind_direction DOUBLE,
+    power_output   DOUBLE,
+    PRIMARY KEY (timestamp, turbine_id)
+);
+
 CREATE TABLE IF NOT EXISTS readings_clean (
     timestamp       TIMESTAMP NOT NULL,
     turbine_id      INTEGER   NOT NULL,
@@ -81,6 +90,16 @@ def _upsert(
         con.execute(f"INSERT OR REPLACE INTO {table} SELECT * FROM _staging")
     finally:
         con.unregister("_staging")
+
+
+def write_raw(con: duckdb.DuckDBPyConnection, df: pd.DataFrame) -> None:
+    """Upsert raw (pre-cleaning) readings into the ``raw_readings`` table.
+
+    Args:
+        con: Open DuckDB connection from :func:`connect`.
+        df: Validated RawReading frame for the run-date window.
+    """
+    _upsert(con, "raw_readings", df)
 
 
 def write_readings(con: duckdb.DuckDBPyConnection, df: pd.DataFrame) -> None:

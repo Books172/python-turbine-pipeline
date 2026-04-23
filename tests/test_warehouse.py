@@ -19,6 +19,19 @@ def sample_readings() -> pd.DataFrame:
     )
 
 
+def test_write_raw_stores_original_values(tmp_path: Path, sample_readings: pd.DataFrame) -> None:
+    """Raw readings are stored before cleaning so the original values are auditable."""
+    db = tmp_path / "t.duckdb"
+    with warehouse.connect(db) as con:
+        warehouse.write_raw(con, sample_readings)
+        rows = con.execute("SELECT COUNT(*) FROM raw_readings").fetchone()[0]
+        val = con.execute(
+            "SELECT power_output FROM raw_readings ORDER BY timestamp LIMIT 1"
+        ).fetchone()[0]
+    assert rows == 2
+    assert val == 3.0
+
+
 def test_write_and_read_back(tmp_path: Path, sample_readings: pd.DataFrame) -> None:
     db = tmp_path / "t.duckdb"
     with warehouse.connect(db) as con:

@@ -36,6 +36,11 @@ uv run turbine-pipeline \
 
 Requires [DuckDB UI] -> https://duckdb.org/2025/03/12/duckdb-ui
 
+```bash
+
+duckdb -ui
+```
+
 Add Database -> Path to local turbines.duckdb file
 
 ## Design
